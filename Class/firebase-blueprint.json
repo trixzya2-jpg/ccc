@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Товар",
+      "description": "Продукт магазина (костюм, рубашка и т.д.)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string", "enum": ["suits", "shirts", "accessories", "shoes"] },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "sizes": { "type": "array", "items": { "type": "string" } },
+        "colors": { "type": "array", "items": { "type": "string" } },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "stock": { "type": "number" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["name", "price", "category", "images", "stock"]
+    },
+    "User": {
+      "title": "Пользователь",
+      "description": "Профиль клиента магазина",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Коллекция товаров магазина"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Профили пользователей"
+    }
+  }
+}
