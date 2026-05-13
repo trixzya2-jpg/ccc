@@ -11,6 +11,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tab, setTab] = useState<'products'|'orders'|'stats'>('products');
+  const [orders, setOrders] = useState<any[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const navigate = useNavigate();
 
@@ -38,6 +40,7 @@ export default function AdminDashboard() {
         if (u) {
           setUser(u);
           fetchProducts();
+          fetchOrders();
         } else {
           navigate('/admin');
         }
@@ -67,6 +70,19 @@ export default function AdminDashboard() {
       console.error("Error fetching products:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    const db = await getDB();
+    if (!db) return;
+    try {
+      const snap = await getDocs(query(collection(db, 'orders')));
+      const items:any[] = [];
+      snap.forEach(d => items.push({id:d.id, ...d.data()}));
+      setOrders(items);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -161,12 +177,9 @@ export default function AdminDashboard() {
         </div>
         
         <nav className="flex-grow px-4 space-y-2">
-          <button className="w-full flex items-center gap-3 p-4 bg-primary text-white rounded-xl font-bold">
-            <LayoutDashboard size={20} /> Товары
-          </button>
-          <button className="w-full flex items-center gap-3 p-4 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-xl transition-all">
-            <Package size={20} /> Заказы
-          </button>
+          <button onClick={() => setTab('products')} className={`w-full flex items-center gap-3 p-4 rounded-xl font-bold ${tab==='products' ? 'bg-primary text-white':'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}><LayoutDashboard size={20} /> Товары</button>
+          <button onClick={() => setTab('orders')} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${tab==='orders' ? 'bg-primary text-white':'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}><Package size={20} /> Заказы</button>
+          <button onClick={() => setTab('stats')} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${tab==='stats' ? 'bg-primary text-white':'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}><DollarSign size={20} /> Статистика</button>
         </nav>
 
         <div className="p-4 border-t border-zinc-800">
@@ -189,7 +202,9 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-zinc-100">
+          {tab === 'orders' && <div className='bg-white rounded-2xl shadow-xl border p-6 mb-6'><h2 className='font-bold mb-4'>Управление заказами</h2><div className='space-y-3'>{orders.length===0 ? 'Заказов пока нет' : orders.map(o => <div key={o.id} className='border rounded-xl p-3 flex justify-between'><span>{o.customerName || o.email || 'Клиент'}</span><span>{o.status || 'new'}</span></div>)}</div></div>}
+          {tab === 'stats' && <div className='bg-white rounded-2xl shadow-xl border p-6 mb-6'><h2 className='font-bold mb-4'>Статистика продаж</h2><p>Всего заказов: {orders.length}</p><p>Оборот: {orders.reduce((s,o)=> s + (o.total || 0), 0).toLocaleString()} ₽</p></div>}
+          {tab === 'products' && <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-zinc-100">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-100">
@@ -238,7 +253,7 @@ export default function AdminDashboard() {
                 )}
               </tbody>
             </table>
-          </div>
+          </div>}
         </div>
       </main>
 
