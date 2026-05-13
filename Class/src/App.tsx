@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Contacts from './pages/Contacts';
 import Login from './pages/Login';
 import UserProfile from './pages/UserProfile';
+import CookieBanner from './components/CookieBanner';
 import { AppProvider } from './context/AppContext';
 
 // Scroll to top on route change
@@ -41,6 +42,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <CookieBanner />
         </div>
       </Router>
     </AppProvider>

@@ -12,6 +12,8 @@ export default function Catalog() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [brandFilter, setBrandFilter] = useState('all');
+  const [sizeFilter, setSizeFilter] = useState('all');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { wishlist, toggleWishlist, addToCart } = useAppContext();
@@ -50,10 +52,15 @@ export default function Catalog() {
     { name: 'Обувь', id: 'shoes' },
   ];
 
+  const brands = ['all', ...Array.from(new Set(products.map(p => (p as any).brand).filter(Boolean)))];
+  const sizes = ['all', ...Array.from(new Set(products.flatMap(p => p.sizes || [])))];
+
   const filteredProducts = products.filter(p => {
     const matchesCategory = currentCategory === 'all' || p.category === currentCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const matchesBrand = brandFilter === 'all' || (p as any).brand === brandFilter;
+    const matchesSize = sizeFilter === 'all' || p.sizes?.includes(sizeFilter);
+    return matchesCategory && matchesSearch && matchesBrand && matchesSize;
   });
 
   return (
@@ -117,6 +124,18 @@ export default function Catalog() {
                   </button>
                 ))}
               </div>
+            </div>
+                        <div>
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-3">Бренд</h3>
+              <select value={brandFilter} onChange={(e)=>setBrandFilter(e.target.value)} className="w-full p-3 border rounded-xl bg-white">
+                {brands.map((b) => <option key={b} value={b}>{b === 'all' ? 'Все бренды' : b}</option>)}
+              </select>
+            </div>
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-400 mb-3">Размер</h3>
+              <select value={sizeFilter} onChange={(e)=>setSizeFilter(e.target.value)} className="w-full p-3 border rounded-xl bg-white">
+                {sizes.map((sz) => <option key={sz} value={sz}>{sz === 'all' ? 'Все размеры' : sz}</option>)}
+              </select>
             </div>
           </aside>
 
